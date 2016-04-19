@@ -9,11 +9,9 @@ def prompt(message)
 end
 
 def press_enter_to_continue
-  loop do
-    prompt "-----------------------------------------------------"
-    prompt "Press enter to continue..."
-    break if gets.include?("\n")
-  end
+  prompt "-----------------------------------------------------"
+  prompt "Press enter to continue..."
+  gets
 end
 
 def display_valid_choices

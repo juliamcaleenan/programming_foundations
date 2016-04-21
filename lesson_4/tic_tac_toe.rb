@@ -129,7 +129,7 @@ def winner?(current_player, board)
 end
 
 def board_full?(board)
-  empty_squares(board).empty?
+  empty_squares(board).none?
 end
 
 def alternate_player(current_player, player, computer)

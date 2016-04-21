@@ -125,7 +125,7 @@ loop do
 
   system('clear') || system('cls')
   prompt "Welcome to Twenty-One."
-  prompt "The winner is the first to reach 5 points. Good luck!"
+  prompt "The winner is the first to reach #{WINNING_SCORE} points. Good luck!"
   press_enter_to_continue
 
   loop do

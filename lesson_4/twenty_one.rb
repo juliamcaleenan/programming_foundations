@@ -37,10 +37,10 @@ def display_cards(cards, show_first_card=true)
   values = ''
   suits = ''
 
-  cards.each do |card|
+  cards.each_with_index do |card, index|
     edges << "+#{'-' * CARD_WIDTH}+   "
     middles << "|#{' ' * CARD_WIDTH}|   "
-    if show_first_card || card != cards.first
+    if show_first_card || index > 0
       values << "|#{(card[0] + ' of').center(CARD_WIDTH)}|   "
       suits << "|#{card[1].center(CARD_WIDTH)}|   "
     else

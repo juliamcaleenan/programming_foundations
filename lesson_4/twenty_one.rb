@@ -3,6 +3,7 @@ VALUES = %w(2 3 4 5 6 7 8 9 10 Jack Queen King Ace).freeze
 MAXIMUM_HAND = 21
 DEALER_HIT_BELOW = 17
 WINNING_SCORE = 5
+CARD_WIDTH = 8
 
 def prompt(message)
   puts "=> #{message}"
@@ -22,41 +23,46 @@ def deal_card(player_or_dealer, deck)
   player_or_dealer[:hand] << deck.pop
 end
 
-def display_initial_hand(player_or_dealer, show_first_card=true)
+def initial_hand(player_or_dealer)
+  player_or_dealer[:hand].slice(0, 2)
+end
+
+def dealt_cards(player_or_dealer)
+  player_or_dealer[:hand].slice(2, player_or_dealer[:hand].size - 2)
+end
+
+def display_cards(cards, show_first_card=true)
+  edges = ''
+  middles = ''
+  values = ''
+  suits = ''
+
+  cards.each do |card|
+    edges << "+#{'-' * CARD_WIDTH}+   "
+    middles << "|#{' ' * CARD_WIDTH}|   "
+    if show_first_card || card != cards.first
+      values << "|#{(card[0] + ' of').center(CARD_WIDTH)}|   "
+      suits << "|#{card[1].center(CARD_WIDTH)}|   "
+    else
+      values << "|#{' ' * CARD_WIDTH}|   "
+      suits << "|#{' ' * CARD_WIDTH}|   "
+    end
+  end
+
+  puts edges
+  puts middles
+  puts values
+  puts suits
+  puts middles
+  puts edges
+end
+
+def display_hand(player_or_dealer, show_first_card=true)
   calculate_total(player_or_dealer)
   puts "\n#{player_or_dealer[:name]}'s hand"\
        "#{", total = #{player_or_dealer[:total]}" if show_first_card}:"
-  puts "+--------+   +--------+"
-  puts "|        |   |        |"
-  puts "|#{show_first_card ? (player_or_dealer[:hand][0][0] + ' of').center(8) : ' ' * 8}|   "\
-       "|#{(player_or_dealer[:hand][1][0] + ' of').center(8)}|"
-  puts "|#{show_first_card ? (player_or_dealer[:hand][0][1]).center(8) : ' ' * 8}|   "\
-       "|#{player_or_dealer[:hand][1][1].center(8)}|"
-  puts "|        |   |        |"
-  puts "+--------+   +--------+"
-end
-
-def display_dealt_cards(player_or_dealer)
-  return nil if player_or_dealer[:hand].size == 2
-  dealt_cards = player_or_dealer[:hand].select.with_index { |_, index| index > 1 }
-  count = dealt_cards.size
-  puts "+--------+#{'   +--------+' if count > 1}#{'   +--------+' if count > 2}#{'   +--------+' if count > 3}"
-  puts "|        |#{'   |        |' if count > 1}#{'   |        |' if count > 2}#{'   |        |' if count > 3}"
-  puts "|#{(dealt_cards[0][0] + ' of').center(8)}|   "\
-       "#{"|#{(dealt_cards[1][0] + ' of').center(8)}|" if count > 1}   "\
-       "#{"|#{(dealt_cards[2][0] + ' of').center(8)}|" if count > 2}   "\
-       "#{"|#{(dealt_cards[3][0] + ' of').center(8)}|" if count > 3}"
-  puts "|#{dealt_cards[0][1].center(8)}|   "\
-       "#{"|#{dealt_cards[1][1].center(8)}|" if count > 1}   "\
-       "#{"|#{dealt_cards[2][1].center(8)}|" if count > 2}   "\
-       "#{"|#{dealt_cards[3][1].center(8)}|" if count > 3}"
-  puts "|        |#{'   |        |' if count > 1}#{'   |        |' if count > 2}#{'   |        |' if count > 3}"
-  puts "+--------+#{'   +--------+' if count > 1}#{'   +--------+' if count > 2}#{'   +--------+' if count > 3}"
-  if count > 4
-    dealt_cards.select.with_index { |_, index| index > 3 }.each do |card|
-      puts "#{card[0]} of #{card[1]}"
-    end
-  end
+  display_cards(initial_hand(player_or_dealer), show_first_card)
+  display_cards(dealt_cards(player_or_dealer)) unless dealt_cards(player_or_dealer).none?
 end
 
 def display_game(player, dealer, show_dealer_card=false)
@@ -65,10 +71,8 @@ def display_game(player, dealer, show_dealer_card=false)
   puts '-' * 40
   puts "#{player[:name]}'s score: #{player[:score]}; "\
        "#{dealer[:name]}'s score: #{dealer[:score]}".center(40)
-  display_initial_hand(player)
-  display_dealt_cards(player)
-  display_initial_hand(dealer, show_dealer_card)
-  display_dealt_cards(dealer)
+  display_hand(player)
+  display_hand(dealer, show_dealer_card)
   puts ""
 end
 
@@ -98,9 +102,13 @@ end
 def find_winner(player, dealer)
   calculate_total(player)
   calculate_total(dealer)
-  if busted?(player) || ((dealer[:total] > player[:total]) && !busted?(dealer))
+  if busted?(player)
     dealer
-  elsif busted?(dealer) || ((player[:total] > dealer[:total]) && !busted?(player))
+  elsif busted?(dealer)
+    player
+  elsif dealer[:total] > player[:total]
+    dealer
+  elsif player[:total] > dealer[:total]
     player
   end
 end
